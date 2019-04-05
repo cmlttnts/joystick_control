@@ -1,0 +1,5 @@
+* Make a cpp file with functions to use
+* Make a header file with declarations
+* Compile it like this -> "gcc -shared -o some_name.so -fPIC some_other_name.c"
+* In python "from ctypes import *"
+* Bind a variable in the python "my_var = CDLL("./some_name.so")
