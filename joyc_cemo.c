@@ -5,14 +5,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-void *thread1(){
-    int i = 0;
-    for(i = 0; i < 25 ; i++) {
-    printf("thread1..\n");
-    sleep(1.5);
-    }
-}
-
 /**
  * Reads a joystick event from the joystick device.
  *
@@ -89,13 +81,7 @@ size_t get_axis_state(struct js_event *event, struct axis_state axes[3])
 
 int main(int argc, char *argv[])
 {   
-
-    pthread_t thread_1;
-    printf("Starting thread1\n");
-
-    pthread_create(&thread_1, NULL, thread1, NULL);
-    printf("from main, thread1 started\n");
-
+    short x_val,y_val;
     const char *device;
     int js;
     struct js_event event;
@@ -113,29 +99,33 @@ int main(int argc, char *argv[])
         perror("Could not open joystick");
 
     /* This loop will exit if the controller is unplugged. */
-    while (read_event(js, &event) == 0)
-    {
-        switch (event.type)
+    while(1){
+        counter++;
+        if (read_event(js, &event) == 0)
         {
-            case JS_EVENT_BUTTON:
-                printf("Button %u %s\n", event.number, event.value ? "pressed" : "released");
-								counter++;
-                break;
-            case JS_EVENT_AXIS:
-                axis = get_axis_state(&event, axes);
-                if (axis < 3)
-                    printf("Axis %lu at (%6d, %6d)\n", axis, axes[axis].x, axes[axis].y);
-                break;
-            default:
-                /* Ignore init events. */
-                break;
-        }
-		if(counter > 10)
-			break;
-    }
+            printf("read event\n");
+            switch (event.type)
+            {
+                case JS_EVENT_BUTTON:
+                    printf("Button %u %s\n", event.number, event.value ? "pressed" : "released");
+                    break;
+                case JS_EVENT_AXIS:
+                    axis = get_axis_state(&event, axes);
+                    if (axis < 3) {
+                        x_val = axes[axis].x;
+                        y_val = axes[axis].y;
+                    }
+                    break;
+                default:
+                    /* Ignore init events. */
+                    break;
+            }
+            printf("(%6d, %6d)\n", x_val, y_val);
 
+        }
+        if(counter > 1000)
+        break;
+    }
     close(js);
-    pthread_join(thread_1, NULL);
-    printf("Thread closed\n");
     return 0;
 }
