@@ -1,1 +1,2 @@
-# joystick_c
+# joystick
+Joystick control trials using c and python
